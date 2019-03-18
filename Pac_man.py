@@ -1,8 +1,5 @@
-# Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,InvincibleGhost,Melon,Galaxian,VulnerableGhost,VulnerableGhost,
-# Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Bell,Cherry,Strawberry,InvincibleGhost,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,
-# Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,Dot,
-# Dot,Dot,Dot,Dot,Orange,Apple,InvincibleGhost,VulnerableGhost,Key,InvincibleGhost,Dot,Dot,Dot,Dot,Dot,VulnerableGhost
-
+# I realized I did this the hard way when I was nearly done
+# I am curious where I went wrong... I want this to work
 
 
 
