@@ -1,127 +1,63 @@
-# I realized I did this the hard way when I was nearly done
-# I am curious where I went wrong... I want this to work
+"""Replay a sequence of events from the original arcade scoring exercise."""
+import argparse
+from dataclasses import dataclass
+from pathlib import Path
+
+POINTS = {
+    'Dot': 10, 'Cherry': 100, 'Strawberry': 300, 'Orange': 500, 'Apple': 700,
+    'Melon': 1000, 'Galaxian': 2000, 'Bell': 3000, 'Key': 5000,
+}
+GHOST_POINTS = (200, 400, 800, 1600)
+EVENTS = {*POINTS, 'VulnerableGhost', 'InvincibleGhost'}
 
 
+@dataclass(frozen=True)
+class Score:
+    points: int
+    lives: int
+    events_played: int
 
-points = 5000
-tmp_points = 5000
 
-f = open("game.txt", "r")
-x = f.read().split(",")
-
-
-def start():
+def replay(events):
+    points = 5000
     lives = 3
-    while lives > 3:
-        for i in x:
-            if i == "VulnerableGhost":
-                points += 200
-                tmp_points += 200
-                if tmp_points >= 10000:
-                    lives += 1
-                    points += tmp_points
-                    tmp_points -= 10000
-                elif i == "VulnerableGhost":
-                    points += 400
-                    tmp_points += 400 
-                    if tmp_points >= 10000:
-                        lives += 1
-                        points += tmp_points
-                        tmp_points -= 10000
-                    elif i == "VulnerableGhost":
-                        points += 800
-                        tmp_points += 800 
-                        if tmp_points >= 10000:
-                            lives += 1
-                            points += tmp_points
-                            tmp_points -= 10000
-                        elif i == "VulnerableGhost":
-                            points += 1600
-                            tmp_points += 1600
-                            if tmp_points >= 10000:
-                                lives += 1
-                                points += tmp_points
-                                tmp_points -= 10000
-                        else:
-                            break
-                    else:
-                        break
-                else:
-                    break
-            elif i == "Dot":
-                points += 10
-                tmp_points += 10 
-                if tmp_points >= 10000:
-                    lives += 1
-                    points += tmp_points
-                    tmp_points -= 10000
-            elif i == "Melon":
-                points += 1000
-                tmp_points += 1000
-                if tmp_points >= 10000:
-                    lives += 1
-                    points += tmp_points
-                    tmp_points -= 10000
-            elif i == "Cherry":
-                points += 100
-                tmp_points += 100 
-                if tmp_points >= 10000:
-                    lives += 1
-                    points += tmp_points
-                    tmp_points -= 10000
-            elif i == "Strawberry":
-                points += 300
-                tmp_points += 300
-                if tmp_points >= 10000:
-                    lives += 1
-                    points += tmp_points
-                    tmp_points -= 10000
-            elif i == "Orange":
-                points += 500
-                tmp_points += 500
-                if tmp_points >= 10000:
-                    lives += 1
-                    points += tmp_points
-                    tmp_points -= 10000
-            elif i == "Apple":
-                points += 700
-                tmp_points += 700 
-                if tmp_points >= 10000:
-                    lives += 1
-                    points += tmp_points
-                    tmp_points -= 10000
-            elif i == "Galaxian":
-                points += 2000
-                tmp_points += 2000 
-                if tmp_points >= 10000:
-                    lives += 1
-                    points += tmp_points
-                    tmp_points -= 10000
-            elif i == "Bell":
-                points += 3000
-                tmp_points += 3000
-                if tmp_points >= 10000:
-                    lives += 1
-                    points += tmp_points
-                    tmp_points -= 10000
-            elif i == "Key":
-                points += 5000
-                tmp_points += 5000 
-                if tmp_points >= 10000:
-                    lives += 1
-                    points += tmp_points
-                    tmp_points -= 10000
-            elif i == "InvincibleGhost":
-                lives -= 1
-                break
-            else:
-                lives = 0
-                break
-
-start()
-print(f'{points}')
+    next_bonus = 10000
+    ghosts = 0
+    played = 0
+    for event in events:
+        if event not in EVENTS:
+            raise ValueError(f'Unknown event: {event!r}')
+        if not lives:
+            break
+        played += 1
+        if event == 'InvincibleGhost':
+            lives -= 1
+            ghosts = 0
+        elif event == 'VulnerableGhost':
+            points += GHOST_POINTS[min(ghosts, len(GHOST_POINTS) - 1)]
+            ghosts += 1
+        else:
+            points += POINTS[event]
+        while points >= next_bonus:
+            lives += 1
+            next_bonus += 10000
+    return Score(points, lives, played)
 
 
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('file', nargs='?', type=Path, default=Path(__file__).with_name('game.txt'))
+    parser.add_argument('--details', action='store_true', help='Show remaining lives and events played.')
+    args = parser.parse_args()
+    try:
+        events = [value.strip() for value in args.file.read_text(encoding='utf-8').split(',') if value.strip()]
+        score = replay(events)
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
+    print(score.points)
+    if args.details:
+        print(f'Lives remaining: {score.lives} · Events played: {score.events_played}')
 
 
-
+if __name__ == '__main__':
+    main()
